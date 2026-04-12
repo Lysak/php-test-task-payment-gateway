@@ -1,0 +1,64 @@
+{
+    "name": "lysak/php-test-task-payment-gateway",
+    "description": "Reusable PHP package for signed payment gateway requests over mTLS.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Lysak\\PhpTestTaskPaymentGateway\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Lysak\\PhpTestTaskPaymentGateway\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Dmytrii Lysak",
+            "email": "dmytrii.lysak@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.5",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.0 || ^2.0",
+        "symfony/http-foundation": "^8.0"
+    },
+    "require-dev": {
+        "guzzlehttp/guzzle": "^7.10",
+        "phpstan/phpstan": "^2.1",
+        "friendsofphp/php-cs-fixer": "^3.94",
+        "roave/security-advisories": "dev-latest",
+        "phpunit/phpunit": "^13",
+        "rector/rector": "^2.4",
+        "vlucas/phpdotenv": "^5.6",
+        "phpmd/phpmd": "^3.x-dev"
+    },
+    "suggest": {
+        "guzzlehttp/guzzle": "PSR-18 HTTP client implementation for tests or direct package usage.",
+        "symfony/http-client": "Alternative HTTP client that can be adapted to PSR-18 in framework applications."
+    },
+    "scripts": {
+        "quality": [
+            "@rector-check",
+            "@cs-check",
+            "@analyze",
+            "@mess"
+        ],
+        "fix": [
+            "@rector-fix",
+            "@cs-fix"
+        ],
+        "rector-check": "vendor/bin/rector process --dry-run",
+        "cs-check": "php-cs-fixer fix --dry-run --diff --allow-risky=yes",
+        "analyze": "phpstan analyse --error-format=table --no-progress",
+        "mess": "vendor/bin/phpmd analyze src --format=text --ruleset=phpmd.xml && printf '\n[PASS] PHPMD completed successfully. No rule violations found.\n'",
+        "rector-fix": "vendor/bin/rector process",
+        "cs-fix": "php-cs-fixer fix --allow-risky=yes",
+        "test": "phpunit"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

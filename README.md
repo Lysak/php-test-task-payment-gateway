@@ -20,7 +20,14 @@ cp .env.example .env
 | `PAYMENT_MTLS_KEY_PASSPHRASE` | no | Private key passphrase |
 | `PAYMENT_INTEGRATION_URL` | yes | API endpoint for integration test |
 
-For BadSSL testing, download certificates from [badssl.com/download](https://badssl.com/download/) (passphrase: `badssl.com`).
+## Certificates
+
+Place your mTLS client certificates in the `certs/` directory. Two options:
+
+- **Combined file** (key + cert in one `.pem`): set only `PAYMENT_MTLS_CERT_PATH`, leave `PAYMENT_MTLS_KEY_PATH` empty.
+- **Separate files** (`.crt` + `.key`): set both `PAYMENT_MTLS_CERT_PATH` and `PAYMENT_MTLS_KEY_PATH`.
+
+For BadSSL testing, download the combined `.pem` from [badssl.com/download](https://badssl.com/download/) (passphrase: `badssl.com`) and place it at `certs/badssl.com-client.pem`.
 
 ## Tests
 
