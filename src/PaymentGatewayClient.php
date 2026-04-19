@@ -13,6 +13,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class PaymentGatewayClient
 {
@@ -49,7 +50,11 @@ class PaymentGatewayClient
             throw new TransportException($exception);
         }
 
-        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+        if (
+            // 2xx range
+            $response->getStatusCode() < Response::HTTP_OK
+            || $response->getStatusCode() >= Response::HTTP_MULTIPLE_CHOICES
+        ) {
             throw new RequestFailedException($response);
         }
 
