@@ -11,9 +11,10 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(NonceGenerator::class)]
 class NonceGeneratorTest extends TestCase
 {
+    private const int BATCH_SIZE = 1000;
     /**
      * RFC 4122 UUID v4 format:
-     *   - third group starts with "4"   (version nibble)
+     *   - third group starts with "4" (version nibble)
      *   - fourth group starts with 8/9/a/b (variant 10xx bits)
      */
     private const string UUID_V4_REGEX =
@@ -41,10 +42,10 @@ class NonceGeneratorTest extends TestCase
         $generator = new NonceGenerator();
         $batch = [];
 
-        for ($i = 0; $i < 1000; ++$i) {
+        for ($i = 0; $i < self::BATCH_SIZE; ++$i) {
             $batch[] = $generator->generate();
         }
 
-        self::assertCount(1000, array_unique($batch), 'Nonce collision detected within 1000 samples.');
+        self::assertCount(self::BATCH_SIZE, array_unique($batch), 'Nonce collision detected within 1000 samples.');
     }
 }

@@ -34,7 +34,8 @@
         "phpunit/phpunit": "^13",
         "rector/rector": "^2.4",
         "vlucas/phpdotenv": "^5.6",
-        "phpmd/phpmd": "^3.x-dev"
+        "phpmd/phpmd": "^3.x-dev",
+        "povils/phpmnd": "^3.6"
     },
     "suggest": {
         "guzzlehttp/guzzle": "PSR-18 HTTP client implementation for tests or direct package usage.",
@@ -45,12 +46,14 @@
             "@rector-check",
             "@cs-check",
             "@analyze",
-            "@mess"
+            "@mess",
+            "@mnd"
         ],
         "fix": [
             "@rector-fix",
             "@cs-fix"
         ],
+        "mnd": "vendor/bin/phpmnd src/ tests/ --progress --strings",
         "rector-check": "vendor/bin/rector process --dry-run",
         "cs-check": "php-cs-fixer fix --dry-run --diff --allow-risky=yes",
         "analyze": "phpstan analyse --error-format=table --no-progress",

@@ -11,10 +11,16 @@ use Lysak\PhpTestTaskPaymentGateway\Support\CanonicalPayloadQueryBuilder;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class SignedRequestBuilder
 {
+    private const string DEFAULT_SCHEME = 'https';
+    private const string DEFAULT_PATH = '/';
+    private const int PORT_HTTPS = 443;
+    private const int PORT_HTTP = 80;
+
     /** HTTP methods where payload is sent as a query string */
     private const array QUERY_METHODS = [Request::METHOD_GET, Request::METHOD_DELETE];
 
@@ -22,13 +28,13 @@ class SignedRequestBuilder
     private const array BODY_METHODS = [Request::METHOD_POST, Request::METHOD_PUT];
 
     /**
-     * @param  RequestFactoryInterface&StreamFactoryInterface  $httpFactory
+     * @param  RequestFactoryInterface&StreamFactoryInterface&UriFactoryInterface  $httpFactory
      * @param  AmexMacHeaderBuilder  $macHeaderBuilder
      * @param  CanonicalPayloadQueryBuilder  $queryBuilder
      * @param  NonceGenerator  $nonceGenerator
      */
     public function __construct(
-        private readonly RequestFactoryInterface&StreamFactoryInterface $httpFactory,
+        private readonly RequestFactoryInterface&StreamFactoryInterface&UriFactoryInterface $httpFactory,
         private readonly AmexMacHeaderBuilder $macHeaderBuilder = new AmexMacHeaderBuilder(),
         private readonly CanonicalPayloadQueryBuilder $queryBuilder = new CanonicalPayloadQueryBuilder(),
         private readonly NonceGenerator $nonceGenerator = new NonceGenerator(),
@@ -167,13 +173,13 @@ class SignedRequestBuilder
      */
     private function parseUrl(string $url): array
     {
-        $parts = parse_url($url);
+        $uri = $this->httpFactory->createUri($url);
 
-        $scheme = $parts['scheme'] ?? 'https';
-        $host = $parts['host'] ?? '';
-        $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
-        $path = $parts['path'] ?? '/';
-        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+        $scheme = $uri->getScheme() !== '' ? $uri->getScheme() : self::DEFAULT_SCHEME;
+        $host = $uri->getHost();
+        $port = $uri->getPort() ?? ($scheme === self::DEFAULT_SCHEME ? self::PORT_HTTPS : self::PORT_HTTP);
+        $path = $uri->getPath() !== '' ? $uri->getPath() : self::DEFAULT_PATH;
+        $query = $uri->getQuery() !== '' ? '?' . $uri->getQuery() : '';
 
         return [
             'host' => $host,
@@ -205,9 +211,7 @@ class SignedRequestBuilder
      */
     private function guardAgainstExistingQuery(string $endpointUrl): void
     {
-        $existingQuery = parse_url($endpointUrl, \PHP_URL_QUERY);
-
-        if (\is_string($existingQuery) && $existingQuery !== '') {
+        if ($this->httpFactory->createUri($endpointUrl)->getQuery() !== '') {
             throw new InvalidArgumentException(
                 'Endpoint URL must not contain a query string; all parameters must be passed via $payload so the HMAC signature covers them.',
             );
